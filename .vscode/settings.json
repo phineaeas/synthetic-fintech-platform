@@ -1,0 +1,4 @@
+{
+    "python.defaultInterpreterPath": "/home/pc/miniconda3/envs/data/bin/python",
+    "python.terminal.activateEnvironment": true
+}
