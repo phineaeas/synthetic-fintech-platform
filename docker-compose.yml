@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: fintech_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
+    name: fintech_postgres_data
+
+# NOTE: airflow and superset services will be added in later phases (7 and 8),
+# once generators/loaders/dbt are working standalone. Keep this file minimal
+# for now so each piece can be verified independently.
