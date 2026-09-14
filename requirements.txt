@@ -4,3 +4,4 @@
 # SQLAlchemy, psycopg2, dbt-core, dbt-postgres, Jupyter, pyarrow).
 
 faker
+python-dotenv
