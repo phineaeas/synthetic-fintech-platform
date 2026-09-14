@@ -1,6 +1,10 @@
-# Environment
+# Environment / secrets
 .env
 .env.*
+
+# Generated synthetic source data (regenerated on each run, not source-controlled)
+data/raw_source/*
+!data/raw_source/.gitkeep
 
 # Python
 __pycache__/
@@ -8,23 +12,20 @@ __pycache__/
 *.pyo
 .pytest_cache/
 .mypy_cache/
-
-# Virtual environments
 .venv/
 venv/
-
-# Generated data
-data/raw_source/*
-!data/raw_source/.gitkeep
+*.egg-info/
 
 # dbt
 dbt/target/
-dbt/logs/
 dbt/dbt_packages/
+dbt/logs/
 
 # Airflow
 airflow/logs/
+airflow/__pycache__/
 
-# OS / IDE
+# OS / editor
 .DS_Store
-Thumbs.db
+.vscode/
+.idea/
