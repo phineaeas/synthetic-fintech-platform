@@ -58,3 +58,73 @@ models:
           - accepted_values:
               arguments:
                 values: ["checking", "savings", "credit"]
+
+  - name: stg_merchants
+    description: >
+      One row per merchant, deduplicated and type-cast from raw.merchants.
+      Rows with a NULL merchant_id are filtered out here. No foreign keys -
+      merchants are an independent entity.
+    columns:
+      - name: merchant_id
+        description: Business key, format MERCH#####.
+        tests:
+          - unique
+          - not_null
+      - name: category
+        description: Normalized to lowercase.
+        tests:
+          - accepted_values:
+              arguments:
+                values:
+                  - grocery
+                  - electronics
+                  - restaurant
+                  - fashion
+                  - entertainment
+                  - travel
+                  - utilities
+
+  - name: stg_transactions
+    description: >
+      One row per transaction, deduplicated and type-cast from
+      raw.transactions. Rows with a NULL transaction_id, or an account_id /
+      merchant_id that doesn't exist in stg_accounts / stg_merchants, are
+      filtered out here. Negative amounts are NOT filtered - see model SQL
+      for why.
+    columns:
+      - name: transaction_id
+        description: Business key, format TXN#######.
+        tests:
+          - unique
+          - not_null
+      - name: account_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_accounts')
+                field: account_id
+      - name: merchant_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_merchants')
+                field: merchant_id
+      - name: currency
+        description: Normalized to uppercase.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["EUR", "USD", "GBP", "PLN"]
+      - name: status
+        description: Normalized to lowercase.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["success", "failed", "pending"]
+      - name: transaction_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["purchase", "refund", "transfer", "withdrawal"]
