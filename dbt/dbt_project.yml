@@ -1,0 +1,36 @@
+name: "fintech"
+version: "1.0.0"
+config-version: 2
+
+profile: "fintech"
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  fintech:
+    staging:
+      # Views: staging does light transformation (casting, normalization) on
+      # top of RAW. Materializing as views keeps it cheap and always fresh
+      # relative to RAW - there's no need to persist an extra physical copy
+      # of near-identical data.
+      +materialized: view
+      +schema: staging
+    core:
+      # Tables: core is the stable, queryable layer (dimensions + facts).
+      # Materializing as tables avoids recomputing joins/dedup logic on
+      # every downstream query.
+      +materialized: table
+      +schema: core
+    marts:
+      # Tables: marts are aggregated and read directly by Superset -
+      # they should be fast to query, not recomputed per dashboard load.
+      +materialized: table
+      +schema: mart

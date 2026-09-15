@@ -29,3 +29,4 @@ airflow/__pycache__/
 .DS_Store
 .vscode/
 .idea/
+dbt/.user.yml
