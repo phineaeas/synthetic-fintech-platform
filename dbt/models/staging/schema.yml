@@ -22,3 +22,39 @@ models:
           - accepted_values:
               arguments:
                 values: ["retail", "premium", "business"]
+
+  - name: stg_accounts
+    description: >
+      One row per account, deduplicated and type-cast from raw.accounts.
+      Rows with a NULL account_id, NULL customer_id, or a customer_id that
+      doesn't exist in stg_customers are filtered out here.
+    columns:
+      - name: account_id
+        description: Business key, format ACC######.
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customers')
+                field: customer_id
+      - name: currency
+        description: Normalized to uppercase.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["EUR", "USD", "GBP", "PLN"]
+      - name: status
+        description: Normalized to lowercase.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["active", "closed", "suspended"]
+      - name: account_type
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["checking", "savings", "credit"]

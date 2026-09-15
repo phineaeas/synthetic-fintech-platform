@@ -30,3 +30,4 @@ airflow/__pycache__/
 .vscode/
 .idea/
 dbt/.user.yml
+logs/
