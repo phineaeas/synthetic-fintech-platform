@@ -1,0 +1,24 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: >
+      One row per customer, deduplicated and type-cast from raw.customers.
+      Rows with a NULL customer_id in RAW are filtered out here (see model SQL).
+    columns:
+      - name: customer_id
+        description: Business key, format CUST#####.
+        tests:
+          - unique
+          - not_null
+      - name: status
+        description: Normalized to lowercase.
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["active", "inactive", "closed"]
+      - name: segment
+        tests:
+          - accepted_values:
+              arguments:
+                values: ["retail", "premium", "business"]

@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: raw
+    schema: raw
+    description: >
+      Raw landing zone, loaded via Python loaders (full refresh:
+      TRUNCATE + INSERT on every pipeline run). No constraints by design -
+      intentionally contains NULLs, duplicates, invalid foreign keys,
+      inconsistent casing and wrong types (see generators/ for the exact
+      corruption logic, ~3% per issue type).
+    tables:
+      - name: customers
+        description: One row per generated customer record from the simulated CRM system.
+      - name: accounts
+        description: One row per generated account record from the simulated banking system.
+      - name: merchants
+        description: One row per generated merchant record from the simulated reference/product system.
+      - name: transactions
+        description: One row per generated transaction record from the simulated banking system.
