@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: dim_customer
+    description: Customer dimension. Grain 1 row = 1 customer.
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_account
+    description: Account dimension. Grain 1 row = 1 account.
+    columns:
+      - name: account_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_merchant
+    description: Merchant dimension. Grain 1 row = 1 merchant.
+    columns:
+      - name: merchant_id
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_transaction
+    description: Transaction fact. Grain 1 row = 1 transaction.
+    columns:
+      - name: transaction_id
+        tests:
+          - unique
+          - not_null
