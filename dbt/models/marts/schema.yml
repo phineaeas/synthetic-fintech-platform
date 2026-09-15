@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: mart_daily_transactions
+    description: Daily transaction volume and amount. Grain 1 row = 1 day.
+    columns:
+      - name: date
+        tests:
+          - unique
+          - not_null
+
+  - name: mart_customer_activity
+    description: >
+      Per-customer transaction activity summary. Includes customers with
+      zero transactions (transaction_count = 0). Grain 1 row = 1 customer.
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: mart_merchant_performance
+    description: >
+      Per-merchant transaction performance summary. Includes merchants with
+      zero transactions. Grain 1 row = 1 merchant.
+    columns:
+      - name: merchant_id
+        tests:
+          - unique
+          - not_null
