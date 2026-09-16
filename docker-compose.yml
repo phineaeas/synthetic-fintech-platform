@@ -28,41 +28,54 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # `airflow standalone` runs scheduler + webserver + triggerer +
-      # dag-processor in a single process - the right amount of Airflow
-      # for a manually-triggered MVP DAG, not the full multi-container
-      # CeleryExecutor setup Airflow's own quick-start docs default to.
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
-
-      # Airflow's own metadata lives in a SEPARATE DATABASE (not schema)
-      # inside the same Postgres instance as the warehouse - keeps
-      # orchestrator bookkeeping out of the raw/staging/core/mart schemas.
-      # See postgres/init/03_airflow_db.sql.
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
-
-      # Same credentials the host-side loaders/dbt use, but POSTGRES_HOST
-      # is overridden to the Docker Compose service name "postgres" -
-      # inside this container "localhost" would mean the container itself,
-      # not the postgres service (that's why loaders/db.py and
-      # dbt/profiles.yml both default to "localhost" but read this env var
-      # first).
       POSTGRES_HOST: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       DBT_PROFILES_DIR: /opt/project/dbt
-
-      # Installed at container startup (MVP simplicity trade-off - see
-      # docker-compose.yml comment history / README for the production
-      # alternative of a custom Dockerfile).
       _PIP_ADDITIONAL_REQUIREMENTS: "faker python-dotenv psycopg2-binary dbt-core dbt-postgres"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
       - .:/opt/project
     command: standalone
 
+  superset:
+    build:
+      context: ./superset
+      dockerfile: Dockerfile
+    container_name: fintech_superset
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8088:8088"
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      # Superset's documented extension point: any .py file here is
+      # imported automatically at startup. This is how SECRET_KEY and
+      # SQLALCHEMY_DATABASE_URI (Superset's OWN metadata database - a
+      # separate "superset" database, see postgres/init/04_superset_db.sql)
+      # get configured, without baking secrets into the image itself.
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+      - superset_home:/app/superset_home
+    command: >
+      bash -c "
+      superset db upgrade &&
+      superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.local --password admin || true &&
+      superset init &&
+      superset run -h 0.0.0.0 -p 8088
+      "
+
 volumes:
   postgres_data:
     name: fintech_postgres_data
+  superset_home:
+    name: fintech_superset_home
