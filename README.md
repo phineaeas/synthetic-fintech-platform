@@ -1,11 +1,11 @@
 # Synthetic Fintech Platform
 
-Batch data platform for processing synthetic fintech data.
+Локальная data-платформа для обработки синтетических финтех-данных.
 
-## Architecture
+## Архитектура
 
 ```text
-Python Generators
+Python-генераторы
        ↓
      JSONL
        ↓
@@ -21,17 +21,21 @@ Python Generators
        ↓
    Superset
 
-Airflow orchestrates the pipeline.
+Пайплайн оркестрируется Airflow.
 ```
 
-## Data Domain
+![Архитектура проекта](docs/architecture.png)
+
+## Модель данных
 
 - Customer
 - Account
 - Merchant
 - Transaction
 
-## Project Structure
+![ER-диаграмма core-слоя](docs/erd.png)
+
+## Структура проекта
 
 ```text
 generators/     # генерация исходных данных
@@ -44,35 +48,54 @@ superset/       # конфигурация Superset
 tests/          # тесты
 ```
 
-## Requirements
+## Требования
 
-- Windows + WSL2 / Linux
-- Docker Desktop
-- Docker Compose
+- Windows + WSL2 / macOS / Linux
+- Docker Desktop (Windows/macOS) или Docker Engine + Compose (Linux)
 - Git
 
-## Run
+## Запуск
 
-Clone repository:
+Клонировать репозиторий:
 
 ```bash
 git clone https://github.com/phineaeas/synthetic-fintech-platform.git
 cd synthetic-fintech-platform
 ```
 
-Start services:
+Настроить окружение (создаст `.env`, поправит права на `data/` и `dbt/`):
+
+```bash
+bash scripts/setup.sh
+```
+
+Поднять сервисы:
 
 ```bash
 docker compose up -d
 ```
 
-Check containers:
+Проверить контейнеры:
 
 ```bash
 docker compose ps
 ```
 
-## Pipeline
+## Доступ к сервисам
+
+**Airflow** — http://localhost:8080
+Логин `admin`, пароль генерируется при первом запуске:
+
+```bash
+docker compose logs airflow 2>&1 | grep -i "password for user"
+```
+
+Разморозьте DAG `fintech_pipeline` и запустите вручную.
+
+**Superset** — http://localhost:8088
+Логин: `admin` / `admin`
+
+## Пайплайн
 
 ```text
 generate
@@ -84,18 +107,18 @@ dbt run
 dbt test
 ```
 
-Pipeline запускается и оркестрируется через Airflow.
+Пайплайн запускается и оркестрируется через Airflow.
 
-## Services
+## Сервисы
 
-| Service | Purpose |
+| Сервис | Назначение |
 |---|---|
 | PostgreSQL | хранение данных |
 | Airflow | оркестрация |
 | dbt | трансформации |
 | Superset | визуализация |
 
-## Stop
+## Остановка
 
 ```bash
 docker compose down
