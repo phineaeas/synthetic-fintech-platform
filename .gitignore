@@ -31,3 +31,4 @@ airflow/__pycache__/
 .idea/
 dbt/.user.yml
 logs/
+!.env.example

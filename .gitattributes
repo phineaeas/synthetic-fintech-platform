@@ -1,0 +1,12 @@
+# Force LF line endings for text files, regardless of the contributor's OS
+# or git config. Without this, Windows git clients can silently convert
+# shell scripts to CRLF on checkout, which breaks `bash scripts/setup.sh`
+# and Dockerfile heredocs on any Unix-like system (Linux/macOS/WSL2).
+* text=auto eol=lf
+
+*.sh text eol=lf
+*.py text eol=lf
+*.sql text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+Dockerfile text eol=lf
