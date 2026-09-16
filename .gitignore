@@ -32,3 +32,4 @@ airflow/__pycache__/
 dbt/.user.yml
 logs/
 !.env.example
+.vscode/
