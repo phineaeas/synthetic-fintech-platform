@@ -1,7 +1,19 @@
-# Pinned to specific versions once the project stabilizes; for now, track
-# what's been pip-installed into the conda "data" environment beyond what
-# spec section 3 already lists as pre-installed (requests, pandas, numpy,
-# SQLAlchemy, psycopg2, dbt-core, dbt-postgres, Jupyter, pyarrow).
+# Зависимости для локальной разработки: генераторы, загрузчики, dbt.
+# Установка одной командой:
+#   pip install -r requirements.txt
+#
+# Для запуска через Docker/Airflow эти пакеты устанавливать не нужно —
+# внутри контейнера Airflow они ставятся автоматически при старте
+# (см. docker-compose.yml, переменная _PIP_ADDITIONAL_REQUIREMENTS).
 
-faker
-python-dotenv
+requests==2.32.5
+pandas==3.0.1
+numpy==2.4.3
+SQLAlchemy==2.0.48
+psycopg2-binary==2.9.11
+dbt-core==1.11.7
+dbt-postgres==1.10.0
+jupyter
+pyarrow==23.0.1
+faker==40.38.0
+python-dotenv==1.2.3
