@@ -1,19 +1,17 @@
--- RAW layer (spec section 12).
+-- RAW-слой 
+-- Осознанное решение: в этих таблицах НЕТ никаких ограничений (ни PRIMARY
+-- KEY, ни FOREIGN KEY, ни NOT NULL). Тут мы намеренно
+-- подмешиваем в этот слой NULL-ы, дубликаты, битые внешние ключи и
+-- отрицательные суммы, а любое ограничение либо отклонило бы такую
+-- вставку, либо тихо "починило" бы плохие данные ещё до того, как их
+-- должен поймать и обработать staging.
 --
--- Design decision: RAW tables carry NO constraints (no PRIMARY KEY, no
--- FOREIGN KEY, no NOT NULL) on purpose. Section 10 requires intentionally
--- injecting NULLs, duplicates, invalid FKs and negative amounts into this
--- layer, so any constraint here would either reject the load or silently
--- "fix" bad data before staging gets a chance to validate/normalize it.
---
--- ALL business columns are `text`, including dates and amounts. This is a
--- deliberate correction from an earlier version of this file that typed
--- dates as `date`/`timestamp` and amount as `numeric`: Postgres performs an
--- implicit cast on INSERT for those types, which would silently "fix" the
--- intentional wrong-type corruption (amount generated as a numeric-looking
--- string, e.g. "164.68" instead of 164.68) before staging ever sees it.
--- Per spec section 13, type casting is staging's job, not RAW's - so RAW
--- must not have any type system that could do casting on its own.
+-- ВСЕ бизнес-колонки `text`, включая даты и суммы. Это осознанная
+-- правка более ранней версии файла, где даты были `date`/`timestamp`,
+-- а сумма `numeric`: при такой типизации Postgres сам молча приводит
+-- тип при вставке, и намеренно "битый тип" (сумма, сгенерированная как
+-- строка вида "164.68" вместо числа 164.68) тихо чинится ещё до того,
+-- как до неё доберётся staging. 
 
 CREATE TABLE IF NOT EXISTS raw.customers (
     customer_id     text,
@@ -57,8 +55,8 @@ CREATE TABLE IF NOT EXISTS raw.transactions (
     _loaded_at            timestamp NOT NULL DEFAULT now()
 );
 
--- _loaded_at is our own bookkeeping column (not part of source semantics):
--- it records when the loader inserted the row, useful later for debugging
--- full-refresh runs and for a "freshness" check if we add one. It stays
--- as `timestamp` because we control its value ourselves (DEFAULT now()) -
--- it can never contain intentionally-bad source data.
+-- _loaded_at это служебная колонка (не часть исходных
+-- данных источника): фиксирует момент, когда загрузчик реально вставил
+-- строку. Остаётся типом `timestamp`, потому
+-- что значение всегда задаём мы сами через `DEFAULT now()`- сюда
+-- никогда не попадут намеренно испорченные данные источника.
