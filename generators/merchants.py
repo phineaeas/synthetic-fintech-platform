@@ -1,9 +1,10 @@
 """
-Generate synthetic raw.merchants source data.
-
-Merchants are an independent entity (spec section 5) - no foreign keys in
-or out at this layer. transactions.py will later link to merchant_id the
-same way accounts.py links to customer_id: by reading merchants.jsonl.
+Генерация синтетических исходных данных для raw.merchants
+ 
+Мерчанты независимая сущность: на этом слое нет
+ни исходящих, ни входящих внешних ключей. transactions.py позже свяжется
+с merchant_id точно так же, как accounts.py связывается с customer_id:
+через чтение merchants.jsonl.
 """
 
 import json
@@ -15,14 +16,14 @@ from faker import Faker
 
 # --- Configuration -----------------------------------------------------
 
-SEED = 44  # distinct from customers.py (42) and accounts.py (43)
+SEED = 44  # отличается от customers.py (42) и accounts.py (43)
 NUM_MERCHANTS = 1_000
 BAD_DATA_RATE = 0.03
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data" / "raw_source"
 OUTPUT_PATH = DATA_DIR / "merchants.jsonl"
 
-# Same country pool as customers.py, for consistency across the dataset.
+# Тот же пул стран, что в customers.py - для консистентности по всему датасету
 COUNTRIES = ["Germany", "France", "Spain", "Italy", "Netherlands", "Poland"]
 
 CATEGORIES = [

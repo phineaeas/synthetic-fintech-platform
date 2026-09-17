@@ -1,20 +1,19 @@
 """
-Generate synthetic raw.accounts source data, linked to raw.customers.
-
-Design decisions:
-- Reads data/raw_source/customers.jsonl (must be generated first) to build
-  the pool of valid customer_id values. This is how "linked data" (spec
-  section 9) is achieved between generators: through the file on disk, not
-  in-memory sharing - accounts.py can be re-run independently as long as
-  customers.jsonl already exists.
-- Deterministic: same GENERATION_REFERENCE_DATE / seed pattern as
-  customers.py. See that file's docstring for why "now"/"today" must never
-  be used directly.
-- Invalid FK corruption uses a separate pool of IDs that are guaranteed to
-  never exist in customers.jsonl (CUST9xxxx, outside the real CUST00001-
-  CUST05000 range), rather than corrupting an existing valid ID. This keeps
-  "orphan FK" and "NULL" as distinct, unambiguous data-quality issues for
-  the later dbt relationships test to catch separately.
+Генерация синтетических исходных данных для raw.accounts, связанных с raw.customers.
+ 
+- Читает data/raw_source/customers.jsonl (должен быть сгенерирован заранее),
+  чтобы собрать пул валидных значений customer_id. "связность данных" достигается
+  через файл на диске, а не через разделяемые переменные в памяти
+  accounts.py можно перезапустить отдельно, пока customers.jsonl уже
+  существует.
+- Детерминизм рализован через тот же паттерн GENERATION_REFERENCE_DATE / seed, что в
+  customers.py. 
+- Искажение "невалидный FK" использует отдельный пул id, которые заведомо
+  никогда не встретятся в customers.jsonl (CUST9xxxx, за пределами
+  реального диапазона CUST00001-CUST05000), а не порчу уже существующего
+  валидного id. Так "битый FK" и "NULL" остаются двумя разными,
+  однозначно различимыми проблемами качества данных для последующего
+  dbt-теста relationships.
 """
 
 import json
@@ -25,8 +24,8 @@ from pathlib import Path
 
 # --- Configuration -----------------------------------------------------
 
-SEED = 43  # different from customers.py's seed so the two generators don't
-           # produce correlated "random" choices
+SEED = 43  # отличается от seed в customers.py, чтобы два генератора не
+           # выдавали коррелирующие "случайные" значения
 NUM_ACCOUNTS = 7_500
 BAD_DATA_RATE = 0.03
 
@@ -56,7 +55,7 @@ def load_valid_customer_ids(path: Path) -> list[str]:
         for line in f:
             record = json.loads(line)
             customer_id = record.get("customer_id")
-            if customer_id:  # skip None/empty - those are the intentional bad rows
+            if customer_id:  # пропускаем None/пустые, это намеренно битые строки
                 ids.add(customer_id)
 
     logger.info("loaded %d distinct valid customer_id values from %s", len(ids), path)
@@ -92,8 +91,9 @@ def _corrupt_record(record: dict, stats: dict) -> dict:
         stats["null_account_id"] += 1
 
     if random.random() < BAD_DATA_RATE:
-        # Orphan FK: an account_id-shaped string outside the real customer
-        # range, so it can never match a real raw.customers row.
+        # Битый FK: строка в формате account_id, но за пределами реального
+        # диапазона клиентов гарантированно никогда не совпадёт со
+        # строкой в raw.customers.
         fake_customer_id = f"CUST9{random.randint(0, 9999):04d}"
         record["customer_id"] = fake_customer_id
         stats["invalid_customer_fk"] += 1

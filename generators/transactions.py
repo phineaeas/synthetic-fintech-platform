@@ -1,22 +1,19 @@
 """
-Generate synthetic raw.transactions source data, linked to both
-raw.accounts and raw.merchants.
-
-Design notes:
-- Reads accounts.jsonl and merchants.jsonl for valid FK pools, same pattern
-  as accounts.py reading customers.jsonl.
-- Two new corruption types beyond what earlier generators used, both
-  explicitly called out in spec section 10:
-    * negative amount (amount * -1)
-    * wrong type (amount written as a string instead of a number - this is
-      only representable because we control JSON serialization directly;
-      it deliberately breaks the "amount is numeric" assumption that
-      staging will need to cast/validate against)
-- currency here is sampled independently of the account's own currency.
-  In a real system transaction currency would usually match (or be
-  validated against) the account's currency - we simplify for MVP scope,
-  since currency-consistency rules aren't in the spec's staging/test
-  requirements (section 13, 17).
+Генерация синтетических исходных данных для raw.transactions, связанных
+одновременно с raw.accounts и raw.merchants.
+ 
+- Читает accounts.jsonl и merchants.jsonl для пулов валидных FK, тот же
+  паттерн, что в accounts.py при чтении customers.jsonl.
+- Два новых вида искажений сверх того, что использовали предыдущие
+  генераторы:
+    * отрицательная сумма (amount * -1)
+    * неверный тип (amount записан строкой вместо числа, это можно
+      сделать только потому, что мы сами напрямую управляем сериализацией
+      в JSON; это намеренно ломает предположение "amount - число",
+      которое staging должен будет привести/проверить явным CAST)
+- currency здесь выбирается независимо от валюты самого счёта. В реальной
+  системе валюта транзакции обычно совпадала бы с валютой счёта (или
+  проверялась бы на совпадение) 
 """
 
 import json
@@ -27,7 +24,7 @@ from pathlib import Path
 
 # --- Configuration -----------------------------------------------------
 
-SEED = 45  # distinct from customers.py (42), accounts.py (43), merchants.py (44)
+SEED = 45  # отличается от customers.py (42), accounts.py (43), merchants.py (44)
 NUM_TRANSACTIONS = 100_000
 BAD_DATA_RATE = 0.03
 
@@ -103,9 +100,9 @@ def _corrupt_record(record: dict, stats: dict) -> dict:
         stats["negative_amount"] += 1
 
     if random.random() < BAD_DATA_RATE:
-        # Wrong type: amount arrives as a string, not a number. This can
-        # stack with the negative-amount corruption above (independent
-        # rolls), same as other generators.
+        # Неверный тип: amount приходит строкой, а не числом. Может
+        # накладываться на искажение "отрицательная сумма" выше
+        # (независимые броски), как и в остальных генераторах
         record["amount"] = str(record["amount"])
         stats["wrong_type_amount"] += 1
 

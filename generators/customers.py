@@ -1,18 +1,17 @@
 """
-Generate synthetic raw.customers source data.
-
-Design decisions (see project README / technical spec section 9-10):
-- Deterministic: fixed random seed so re-running produces byte-identical
-  output. Required for the "full refresh" idempotency strategy: the loader
-  will TRUNCATE + INSERT raw.customers on every pipeline run, so the
-  generated data must not drift between runs.
-- ~BAD_DATA_RATE of records get one or more intentional data-quality issues
-  (NULL id, duplicate row, inconsistent casing, future timestamp). These are
-  NOT flagged in the output - a real source system wouldn't tell you which
-  records are bad. Flagging is only done in the console summary, for our
-  own visibility while developing.
-- Output is JSONL (one JSON object per line), written to
-  data/raw_source/customers.jsonl, per spec section 9.
+Генерация синтетических исходных данных для raw.customers
+ 
+- Детерминизм реализован через фиксированный random seed, чтобы повторный запуск давал
+  побайтово идентичный результат. Загрузчик делает TRUNCATE + INSERT в raw.customers на
+  каждом прогоне пайплайна, поэтому сгенерированные данные не должны
+  плавать между запусками
+- ~BAD_DATA_RATE записей получают одну или несколько намеренных проблем
+  качества данных (NULL id, дубликат строки, разнобой регистра, дата в
+  будущем). Это НЕ помечается в самом выводе и реальный источник данных
+  тоже не подскажет, какие записи плохие. Пометка есть только в
+  консольной сводке, для нашего собственного контроля при разработке.
+- Вывод в формате JSONL (один JSON-объект на строку), пишется в
+  data/raw_source/customers.jsonl
 """
 
 import json
@@ -29,18 +28,19 @@ SEED = 42
 NUM_CUSTOMERS = 5_000
 BAD_DATA_RATE = 0.03
 
-# Fixed anchor for all "relative to now" date generation. Using the real
-# wall-clock time here would break determinism: the same seed still produces
-# the same *sequence* of random draws, but if the date range's upper bound
-# (e.g. "now") differs between two runs seconds apart, the resulting dates
-# differ too. Anchoring to a fixed point removes that source of drift.
+# Фиксированная точка отсчёта для всей генерации дат "относительно сейчас".
+# Использование реального времени здесь сломало бы детерминизм: один и тот
+# же seed всё ещё даёт одну и ту же *последовательность* случайных чисел,
+# но если верхняя граница диапазона дат (например "сейчас") отличается
+# между двумя запусками, разнесёнными во времени хотя бы на секунды —
+# итоговые даты тоже отличаются. Фиксированная точка отсчёта убирает этот
+# источник "дрейфа".
 GENERATION_REFERENCE_DATE = datetime(2026, 1, 1)
 
 OUTPUT_PATH = Path(__file__).resolve().parent.parent / "data" / "raw_source" / "customers.jsonl"
 
-# Fixed, small pools so downstream marts can group meaningfully
-# (an unrestricted Faker country pool would give ~190 near-unique countries
-# across 5000 rows, which is useless for grouping in mart_customer_activity).
+# Небольшие фиксированные пулы, чтобы marts ниже по пайплайну могли
+# осмысленно группировать данные 
 COUNTRIES_AND_CITIES = {
     "Germany": ["Berlin", "Munich", "Hamburg", "Cologne"],
     "France": ["Paris", "Lyon", "Marseille", "Toulouse"],
@@ -79,14 +79,13 @@ def _build_clean_record(customer_id: str, fake: Faker) -> dict:
 
 
 def _corrupt_record(record: dict, stats: dict) -> dict:
-    """Apply independent random corruptions to a copy of the record.
-
-    Each corruption type gets its own independent BAD_DATA_RATE roll, so a
-    single record can end up with zero, one, or (rarely) multiple issues -
-    this mirrors how real-world dirty data tends to show up field by field,
-    not record by record.
+    """Применяет независимые случайные искажения к копии записи.
+ 
+    Каждый тип искажения проверяется независимым броском вероятности
+    BAD_DATA_RATE, поэтому одна запись может получить ноль, одно или
+    (редко) сразу несколько искажений.
     """
-    record = dict(record)  # don't mutate the caller's copy
+    record = dict(record)  # не мутируем словарь вызывающего кода
 
     if random.random() < BAD_DATA_RATE:
         record["customer_id"] = None
@@ -130,8 +129,8 @@ def generate_customers() -> list[dict]:
         dirty = _corrupt_record(clean, stats)
         records.append(dirty)
 
-        # Duplicate injection: append the exact same (already-corrupted) row
-        # again, independent of the other corruption rolls above.
+        # Дублирование: добавляем ту же (уже испорченную) строку ещё раз,
+        # независимо от остальных бросков искажений выше.
         if random.random() < BAD_DATA_RATE:
             records.append(dict(dirty))
             stats["duplicated_rows"] += 1
