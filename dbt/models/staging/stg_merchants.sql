@@ -1,5 +1,4 @@
--- Staging: clean up raw.merchants into a reliable 1-row-per-merchant shape.
--- Simplest of the four staging models - merchants have no foreign keys.
+-- Staging: приводим raw.merchants к надёжному виду "1 строка = 1 мерчант".
 
 with source as (
 

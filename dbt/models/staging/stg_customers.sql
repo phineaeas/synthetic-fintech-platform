@@ -1,15 +1,13 @@
--- Staging: clean up raw.customers into a reliable 1-row-per-customer shape.
+-- Staging: приводим raw.customers к надёжному виду "1 строка = 1 клиент".
 --
--- Steps, in order:
---   1. cast text columns from RAW to their real types
---   2. normalize casing (status/segment lowercase, country/city Title Case)
---   3. drop rows with a NULL customer_id - can't have a dimension row
---      without an identifiable business key
---   4. deduplicate exact-duplicate rows (keep one per customer_id)
---
--- Deliberately NOT filtered here: future-dated created_at. That's a
--- plausible-but-suspicious value, not a structural problem - it stays
--- visible downstream rather than being silently dropped.
+-- Шаги по порядку:
+--   1. каст текстовых колонок из RAW в их настоящие типы
+--   2. нормализация регистра (status/segment - нижний регистр,
+--      country/city - Заглавные Буквы)
+--   3. отбрасываем строки с NULL customer_id - не может быть строки
+--      измерения без опознаваемого бизнес-ключа
+--   4. дедупликация точных дублей (оставляем одну строку на customer_id)
+
 
 with source as (
 

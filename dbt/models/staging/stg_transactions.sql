@@ -1,20 +1,23 @@
--- Staging: clean up raw.transactions into a reliable 1-row-per-transaction
--- shape. Largest and most connected staging model - two FKs to validate
--- (account_id, merchant_id) and the first real numeric cast in this project.
+-- Staging: приводим raw.transactions к надёжному виду "1 строка = 1
+-- транзакция". Самая крупная и самая связанная staging-модель - два FK
+-- на проверку (account_id, merchant_id) и первый настоящий числовой каст
+-- в этом проекте.
 --
--- Deliberately NOT filtered here: negative amounts. A negative amount is a
--- plausible business state (e.g. could represent a refund even though we
--- also have a separate transaction_type = 'refund'), not a structural
--- problem like a missing id or an orphan FK - so it's left visible
--- downstream rather than silently dropped. There is no dbt test enforcing
--- amount >= 0 in this project (out of scope: the built-in generic tests
--- section 17 asks for - unique/not_null/accepted_values/relationships -
--- don't include numeric-range checks without an extra package).
+-- Намеренно НЕ фильтруется здесь: отрицательные суммы. Отрицательная
+-- сумма - правдоподобное бизнес-состояние (например, может означать
+-- возврат, хотя у нас есть и отдельный transaction_type = 'refund'), а не
+-- структурная проблема вроде отсутствующего id или битого FK - поэтому
+-- она остаётся видимой дальше по пайплайну, а не тихо выбрасывается. В
+-- этом проекте нет dbt-теста, требующего amount >= 0 (вне скоупа:
+-- встроенные generic-тесты из раздела 17 спецификации -
+-- unique/not_null/accepted_values/relationships - не включают проверку
+-- числового диапазона без дополнительного пакета).
 --
--- The RAW `amount` column is text (see postgres/init/02_raw_tables.sql for
--- why), and our "wrong type" corruption always produces a valid numeric
--- string (e.g. "164.68"), so a plain CAST is safe here - it never
--- encounters a genuinely non-numeric value.
+-- Колонка amount в RAW текстовая (почему - см.
+-- postgres/init/02_raw_tables.sql), а наше искажение "неверный тип"
+-- всегда даёт валидную числовую строку (например "164.68"), так что
+-- обычный CAST здесь безопасен - он никогда не встретит по-настоящему
+-- нечисловое значение.
 
 with source as (
 

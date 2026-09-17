@@ -1,10 +1,10 @@
--- Staging: clean up raw.accounts into a reliable 1-row-per-account shape.
+-- Staging: приводим raw.accounts к надёжному виду "1 строка = 1 счёт".
 --
--- Same pattern as stg_customers, plus one extra filter: accounts whose
--- customer_id doesn't match any row in stg_customers are dropped here.
--- This is what keeps the `relationships` test on stg_accounts.customer_id
--- passing downstream - the orphan FK problem is caught and resolved at
--- this layer, not left for core to trip over.
+-- Тот же паттерн, что stg_customers, плюс один дополнительный фильтр:
+-- счета, чей customer_id не совпадает ни с одной строкой в stg_customers,
+-- отбрасываются здесь. Именно это держит зелёным relationships-тест на
+-- stg_accounts.customer_id ниже по пайплайну - проблема "битый FK"
+-- ловится и решается на этом слое, а не остаётся для core.
 
 with source as (
 

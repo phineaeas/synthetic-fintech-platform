@@ -1,18 +1,18 @@
 version: 2
-
+ 
 models:
   - name: stg_customers
     description: >
-      One row per customer, deduplicated and type-cast from raw.customers.
-      Rows with a NULL customer_id in RAW are filtered out here (see model SQL).
+      Одна строка на клиента, дедуплицировано и приведено к типам из
+      raw.customers. Строки с NULL customer_id в RAW отфильтровываются
     columns:
       - name: customer_id
-        description: Business key, format CUST#####.
+        description: Бизнес-ключ, формат CUST#####.
         tests:
           - unique
           - not_null
       - name: status
-        description: Normalized to lowercase.
+        description: Приведено к нижнему регистру.
         tests:
           - accepted_values:
               arguments:
@@ -22,15 +22,15 @@ models:
           - accepted_values:
               arguments:
                 values: ["retail", "premium", "business"]
-
+ 
   - name: stg_accounts
     description: >
-      One row per account, deduplicated and type-cast from raw.accounts.
-      Rows with a NULL account_id, NULL customer_id, or a customer_id that
-      doesn't exist in stg_customers are filtered out here.
+      Одна строка на счёт, дедуплицировано и приведено к типам из
+      raw.accounts. Строки с NULL account_id, NULL customer_id, или
+      customer_id, которого нет в stg_customers, отфильтровываются здесь.
     columns:
       - name: account_id
-        description: Business key, format ACC######.
+        description: Бизнес-ключ, формат ACC######.
         tests:
           - unique
           - not_null
@@ -42,13 +42,13 @@ models:
                 to: ref('stg_customers')
                 field: customer_id
       - name: currency
-        description: Normalized to uppercase.
+        description: Приведено к верхнему регистру.
         tests:
           - accepted_values:
               arguments:
                 values: ["EUR", "USD", "GBP", "PLN"]
       - name: status
-        description: Normalized to lowercase.
+        description: Приведено к нижнему регистру.
         tests:
           - accepted_values:
               arguments:
@@ -58,20 +58,20 @@ models:
           - accepted_values:
               arguments:
                 values: ["checking", "savings", "credit"]
-
+ 
   - name: stg_merchants
     description: >
-      One row per merchant, deduplicated and type-cast from raw.merchants.
-      Rows with a NULL merchant_id are filtered out here. No foreign keys -
-      merchants are an independent entity.
+      Одна строка на мерчанта, дедуплицировано и приведено к типам из
+      raw.merchants. Строки с NULL merchant_id отфильтровываются здесь.
+      Внешних ключей нет - мерчанты независимая сущность.
     columns:
       - name: merchant_id
-        description: Business key, format MERCH#####.
+        description: Бизнес-ключ, формат MERCH#####.
         tests:
           - unique
           - not_null
       - name: category
-        description: Normalized to lowercase.
+        description: Приведено к нижнему регистру.
         tests:
           - accepted_values:
               arguments:
@@ -83,17 +83,17 @@ models:
                   - entertainment
                   - travel
                   - utilities
-
+ 
   - name: stg_transactions
     description: >
-      One row per transaction, deduplicated and type-cast from
-      raw.transactions. Rows with a NULL transaction_id, or an account_id /
-      merchant_id that doesn't exist in stg_accounts / stg_merchants, are
-      filtered out here. Negative amounts are NOT filtered - see model SQL
-      for why.
+      Одна строка на транзакцию, дедуплицировано и приведено к типам из
+      raw.transactions. Строки с NULL transaction_id, или с account_id /
+      merchant_id, которого нет в stg_accounts / stg_merchants,
+      отфильтровываются здесь. Отрицательные суммы НЕ отфильтровываются -
+      почему, см. SQL модели.
     columns:
       - name: transaction_id
-        description: Business key, format TXN#######.
+        description: Бизнес-ключ, формат TXN#######.
         tests:
           - unique
           - not_null
@@ -112,13 +112,13 @@ models:
                 to: ref('stg_merchants')
                 field: merchant_id
       - name: currency
-        description: Normalized to uppercase.
+        description: Приведено к верхнему регистру.
         tests:
           - accepted_values:
               arguments:
                 values: ["EUR", "USD", "GBP", "PLN"]
       - name: status
-        description: Normalized to lowercase.
+        description: Приведено к нижнему регистру.
         tests:
           - accepted_values:
               arguments:
