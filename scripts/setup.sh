@@ -1,18 +1,17 @@
 #!/usr/bin/env bash
-# One-time local setup. Safe to re-run - every step here is idempotent.
+# Разовая настройка окружения. Безопасно перезапускать, каждый шаг идемпотентен
 #
-# What this does:
-#   1. Checks Docker and Docker Compose are installed and on PATH.
-#   2. Creates .env from .env.example if .env doesn't exist yet.
-#   3. Opens up write permissions on data/ and dbt/ so the Airflow
-#      container (which runs as a different, non-root user than your host
-#      user) can write generated files and dbt's own target/logs dirs into
-#      these bind-mounted directories. See README "Known limitations" for
-#      why this is a chmod 777 rather than something more surgical.
+# Что делает скрипт:
+#   1. Проверяет, что Docker и Docker Compose установлены и доступны в PATH
+#   2. Создаёт .env из .env.example, если .env ещё не существует
+#   3. Открывает права на запись в data/ и dbt/, чтобы Airflow-контейнер
+#      (работающий от другого пользователя, не от вашего) мог писать
+#      сгенерированные файлы и собственные target/logs dbt в эти
+#      смонтированные папки
 #
-# Requires a Unix-like shell: works as-is on Linux and macOS. On Windows,
-# run this from a WSL2 terminal (not PowerShell) - see README for the
-# Windows setup path.
+# Нужен Unix-подобный shell: на Linux и macOS работает как есть. На Windows
+# запускайте из терминала WSL2 (не из PowerShell) — см. README, раздел
+# про требования.
 
 set -euo pipefail
 
@@ -21,16 +20,16 @@ cd "$PROJECT_ROOT"
 
 echo "==> Checking for Docker..."
 if ! command -v docker >/dev/null 2>&1; then
-    echo "ERROR: 'docker' command not found. Install Docker Desktop (Windows/macOS)"
-    echo "       or Docker Engine (Linux) before continuing. See README for details."
+    echo "ERROR: команда 'docker' не найдена. Установите  Install Docker Desktop (Windows/macOS)"
+    echo "       или Docker Engine (Linux) чтобы продолжить"
     exit 1
 fi
 
 echo "==> Checking for Docker Compose..."
 if ! docker compose version >/dev/null 2>&1; then
-    echo "ERROR: 'docker compose' command not found or not working."
-    echo "       Docker Compose v2 ships with recent Docker Desktop installs;"
-    echo "       on Linux you may need to install the compose plugin separately."
+    echo "ERROR: команда 'docker compose' не найдена"
+    echo "       Docker Compose v2 идёт в комплекте с последними версиями Docker Desktop"
+    echo "       на Linux может потребоваться установить плагин compose отдельно"
     exit 1
 fi
 
@@ -48,19 +47,18 @@ echo "    directories otherwise - see README for why.)"
 CHMOD_LOG="$(mktemp)"
 chmod -R 777 data/ dbt/ 2>"$CHMOD_LOG" || true
 if [ -s "$CHMOD_LOG" ]; then
-    echo "    Note: some files couldn't have their permissions changed - this"
-    echo "    happens if Airflow (running as a different user inside its"
-    echo "    container) already created them, e.g. dbt/target/*.json from a"
-    echo "    previous 'dbt run' triggered through the DAG. If Airflow tasks"
-    echo "    later fail with PermissionError, re-run this step with sudo:"
+    echo "    Примечание: у некоторых файлов не удалось изменить права - это"
+    echo "    случается, если Airflow (работающий под другим пользователем внутри"
+    echo "    своего контейнера) уже создал их, например dbt/target/*.json из"
+    echo "    предыдущего запуска 'dbt run', вызванного через DAG. Если задачи Airflow"
+    echo "    позже завершатся с ошибкой PermissionError, повторите этот шаг с sudo:"
     echo "        sudo chmod -R 777 data/ dbt/"
 fi
 rm -f "$CHMOD_LOG"
 
-echo ""
-echo "Setup complete. Next steps:"
-echo "  1. docker compose up -d"
-echo "  2. Wait for all three services to become healthy: docker compose ps"
-echo "  3. Airflow UI:   http://localhost:8080  (see README for the admin password)"
-echo "  4. Superset UI:  http://localhost:8088  (login: admin / admin)"
-echo "  5. In Airflow, unpause and trigger the 'fintech_pipeline' DAG."
+echo "    Примечание: у некоторых файлов не удалось изменить права - это"
+echo "    случается, если Airflow (работающий под другим пользователем внутри"
+echo "    своего контейнера) уже создал их, например dbt/target/*.json из"
+echo "    предыдущего запуска 'dbt run', вызванного через DAG. Если задачи Airflow"
+echo "    позже завершатся с ошибкой PermissionError, повторите этот шаг с sudo:"
+echo "        sudo chmod -R 777 data/ dbt/"
