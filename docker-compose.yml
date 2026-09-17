@@ -40,18 +40,22 @@ services:
       # служебную бухгалтерию оркестратора отдельно от схем
       # raw/staging/core/mart. См. postgres/init/03_airflow_db.sql.
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
-      
+
       # Те же credentials, что используют загрузчики/dbt с хоста, но
       # POSTGRES_HOST переопределён на имя сервиса Docker Compose
       # "postgres" - изнутри этого контейнера "localhost" означал бы сам
       # контейнер, а не сервис postgres (поэтому loaders/db.py и
       # dbt/profiles.yml оба по умолчанию используют "localhost", но
-      # сначала читают именно эту переменную окружения).ES_HOST: postgres
+      # сначала читают именно эту переменную окружения).
+      POSTGRES_HOST: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
       DBT_PROFILES_DIR: /opt/project/dbt
+
+      # Устанавливается при старте контейнера (компромисс ради простоты
+      # MVP - см. README про альтернативу с кастомным Dockerfile для прода).
       _PIP_ADDITIONAL_REQUIREMENTS: "faker python-dotenv psycopg2-binary dbt-core dbt-postgres"
     volumes:
       - ./airflow/dags:/opt/airflow/dags
