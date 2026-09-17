@@ -17,20 +17,21 @@ clean-targets:
 models:
   fintech:
     staging:
-      # Views: staging does light transformation (casting, normalization) on
-      # top of RAW. Materializing as views keeps it cheap and always fresh
-      # relative to RAW - there's no need to persist an extra physical copy
-      # of near-identical data.
+      # Views: staging делает лёгкую трансформацию (каст типов,
+      # нормализация) поверх RAW. Материализация как view держит это
+      # дёшево и всегда актуально относительно RAW - нет смысла хранить
+      # ещё одну физическую копию почти таких же данных
       +materialized: view
       +schema: staging
     core:
-      # Tables: core is the stable, queryable layer (dimensions + facts).
-      # Materializing as tables avoids recomputing joins/dedup logic on
-      # every downstream query.
+      # Tables: core - стабильный слой, к которому обращаются напрямую
+      # (измерения + факты). Материализация как table избавляет от
+      # пересчёта join'ов/дедупликации на каждый запрос ниже по пайплайну
       +materialized: table
       +schema: core
     marts:
-      # Tables: marts are aggregated and read directly by Superset -
-      # they should be fast to query, not recomputed per dashboard load.
+      # # Tables: marts - агрегированные данные, которые напрямую читает
+      # Superset - они должны быстро открываться, а не пересчитываться
+      # при каждой загрузке дашборда
       +materialized: table
       +schema: mart

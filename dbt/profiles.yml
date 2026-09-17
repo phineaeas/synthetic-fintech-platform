@@ -1,8 +1,8 @@
-# Safe to commit: no literal credentials here, only env_var() references.
-# Actual values come from the project's .env file (same one docker-compose
-# and the Python loaders use) - dbt does not read .env files itself, so it
-# must be sourced into the shell environment before running dbt commands
-# (see README / setup instructions).
+# Безопасно коммитить: здесь нет ни одного настоящего пароля, только
+# ссылки на env_var(). Реальные значения приходят из .env файла проекта
+# (того же самого, что используют docker-compose и Python-загрузчики) -
+# dbt сам .env не читает, поэтому переменные должны быть подгружены в
+# shell-окружение до запуска dbt-команд 
 
 fintech:
   target: dev

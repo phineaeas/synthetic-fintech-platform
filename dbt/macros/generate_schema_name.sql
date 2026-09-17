@@ -1,11 +1,11 @@
 {#
-  dbt's default generate_schema_name macro concatenates the profile's
-  default schema with a model's custom +schema config, e.g. "dev_staging"
-  instead of just "staging". We want our models to land in exactly the
-  schema named in dbt_project.yml (staging/core/mart), matching spec
-  section 11 - so this override uses the custom schema name literally
-  whenever one is set, falling back to the profile's default schema only
-  when a model has no explicit +schema config at all.
+  Стандартный макрос generate_schema_name в dbt склеивает схему по
+  умолчанию из профиля со схемой модели, например "dev_staging" вместо
+  просто "staging". Мы хотим, чтобы модели попадали ровно в те схемы,
+  что названы в dbt_project.yml (staging/core/mart), поэтому здесь мы переопределяем поведение: 
+  если у модели задана своя схема (+schema), используем её буквально, без склеивания;
+  на схему из профиля по умолчанию откатываемся только если у модели
+  вообще нет явного +schema.
 #}
 
 {% macro generate_schema_name(custom_schema_name, node) -%}
