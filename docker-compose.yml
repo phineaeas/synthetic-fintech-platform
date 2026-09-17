@@ -28,10 +28,25 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # `airflow standalone` запускает scheduler + webserver + triggerer +
+      # dag-processor в одном процессе - подходящий объём Airflow для
+      # DAG'а, запускаемого вручную для MVP, а не полный многоконтейнерный
+      # CeleryExecutor-стек из quick-start документации Airflow.
       AIRFLOW__CORE__EXECUTOR: LocalExecutor
       AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+
+      # Собственные метаданные Airflow живут в ОТДЕЛЬНОЙ БАЗЕ (не схеме)
+      # внутри того же инстанса Postgres, что и склад данных - держит
+      # служебную бухгалтерию оркестратора отдельно от схем
+      # raw/staging/core/mart. См. postgres/init/03_airflow_db.sql.
       AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/airflow
-      POSTGRES_HOST: postgres
+      
+      # Те же credentials, что используют загрузчики/dbt с хоста, но
+      # POSTGRES_HOST переопределён на имя сервиса Docker Compose
+      # "postgres" - изнутри этого контейнера "localhost" означал бы сам
+      # контейнер, а не сервис postgres (поэтому loaders/db.py и
+      # dbt/profiles.yml оба по умолчанию используют "localhost", но
+      # сначала читают именно эту переменную окружения).ES_HOST: postgres
       POSTGRES_PORT: "5432"
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -59,11 +74,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
-      # Superset's documented extension point: any .py file here is
-      # imported automatically at startup. This is how SECRET_KEY and
-      # SQLALCHEMY_DATABASE_URI (Superset's OWN metadata database - a
-      # separate "superset" database, see postgres/init/04_superset_db.sql)
-      # get configured, without baking secrets into the image itself.
+      # Задокументированная точка расширения Superset: любой .py файл
+      # здесь автоматически импортируется при старте. Именно так
+      # настраиваются SECRET_KEY и SQLALCHEMY_DATABASE_URI (СОБСТВЕННАЯ
+      # база метаданных Superset - отдельная база "superset", см.
+      # postgres/init/04_superset_db.sql), без зашивания секретов в сам образ.
       - ./superset/superset_config.py:/app/pythonpath/superset_config.py
       - superset_home:/app/superset_home
     command: >
