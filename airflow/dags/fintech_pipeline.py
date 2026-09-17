@@ -1,23 +1,21 @@
 """
-fintech_pipeline: generate_raw -> load_raw -> dbt_run -> dbt_test
-(spec section 18).
-
-Operator choice follows spec section 19: generation tasks use the
-TaskFlow API (@task) since they're our own Python logic; loaders and dbt
-commands use BashOperator, since from Airflow's perspective they're
-"existing scripts / CLI commands" to invoke, not logic to embed.
-
-PROJECT_DIR is a fixed container path (see docker-compose.yml: the whole
-project is bind-mounted to /opt/project) - this DAG only ever runs inside
-the airflow container, so there's no host-path configurability to handle.
-
-Task dependency shape is NOT a single straight line - it mirrors the real
-data dependencies between generators (see generators/*.py docstrings):
-  - generate_accounts reads customers.jsonl -> depends on generate_customers
-  - generate_transactions reads accounts.jsonl AND merchants.jsonl ->
-    depends on BOTH generate_accounts and generate_merchants
-  - each load_* only depends on its own generate_* step finishing
-  - dbt_run waits for ALL four loads (it reads from all four RAW tables)
+задачи генерации используют TaskFlow API (@task), так как это наша собственная Python-
+логика; загрузчики и dbt-команды используют BashOperator, так как с точки
+зрения Airflow это "уже существующие скрипты / CLI-команды" для вызова, а
+не логика для встраивания.
+ 
+PROJECT_DIR - это фиксированный путь внутри контейнера (см.
+docker-compose.yml: весь проект примонтирован в /opt/project) - этот DAG
+выполняется только внутри airflow-контейнера, поэтому настраиваемости
+пути с хоста тут не требуется.
+ 
+Форма графа зависимостей задач НЕ прямая линия - она отражает реальные
+зависимости по данным между генераторами (см. докстринги generators/*.py):
+  - generate_accounts читает customers.jsonl -> зависит от generate_customers
+  - generate_transactions читает accounts.jsonl И merchants.jsonl ->
+    зависит СРАЗУ от generate_accounts и от generate_merchants
+  - каждый load_* зависит только от завершения своего собственного generate_*
+  - dbt_run ждёт завершения ВСЕХ четырёх загрузок (читает из всех четырёх RAW-таблиц)
 """
 
 import subprocess
@@ -41,7 +39,7 @@ def _run_generator(script_name: str) -> None:
 @dag(
     dag_id="fintech_pipeline",
     description="generate_raw -> load_raw -> dbt_run -> dbt_test",
-    schedule=None,  # manual trigger only for MVP (spec section 18)
+    schedule=None,  # только ручной запуск
     start_date=datetime(2026, 1, 1),
     catchup=False,
     tags=["fintech", "mvp"],
