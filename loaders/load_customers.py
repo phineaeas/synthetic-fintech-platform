@@ -1,5 +1,5 @@
 """
-Load data/raw_source/customers.jsonl into raw.customers (full refresh).
+Загружает data/raw_source/customers.jsonl в raw.customers (full refresh)
 """
 
 import logging
@@ -10,8 +10,9 @@ from db import get_connection
 
 DATA_PATH = Path(__file__).resolve().parent.parent / "data" / "raw_source" / "customers.jsonl"
 
-# Column order here must match the INSERT column list - it does not need to
-# match the JSONL key order (dicts are looked up by key, not position).
+# Порядок колонок здесь должен совпадать с порядком колонок в INSERT - но
+# не обязан совпадать с порядком ключей в JSONL (словари ищутся по ключу,
+# а не по позиции)
 COLUMNS = ["customer_id", "created_at", "birth_date", "country", "city", "segment", "status"]
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")

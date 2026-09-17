@@ -1,9 +1,9 @@
 """
-Load data/raw_source/transactions.jsonl into raw.transactions (full refresh).
-
-Largest of the four loaders (~103k rows) - this is where execute_values
-batch insert (see common.py) actually matters for performance; a row-by-row
-INSERT loop here would be noticeably slower.
+Загружает data/raw_source/transactions.jsonl в raw.transactions (full refresh).
+ 
+Самый большой из четырёх загрузчиков (~103 тыс. строк) - именно здесь
+пакетная вставка execute_values (см. common.py) реально важна для
+производительности; цикл с INSERT по одной строке был бы заметно медленнее
 """
 
 import logging

@@ -1,5 +1,5 @@
 """
-Load data/raw_source/merchants.jsonl into raw.merchants (full refresh).
+Загружает data/raw_source/merchants.jsonl в raw.merchants (full refresh)
 """
 
 import logging

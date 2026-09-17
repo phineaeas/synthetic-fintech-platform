@@ -1,14 +1,14 @@
 """
-Shared utilities for loaders/load_*.py scripts.
-
-Implements the two pieces of logic every loader needs, per spec sections
-20-23:
-- read source JSONL tolerantly: a malformed line is logged and skipped,
-  it must not abort the whole batch.
-- load into RAW using the full-refresh idempotency strategy: TRUNCATE the
-  target table, then batch-insert everything in one transaction. This
-  guarantees re-running a loader never duplicates rows, since generators
-  are deterministic (same input file -> same rows every time).
+Общие утилиты для скриптов loaders/load_*.py
+ 
+Реализует два блока логики, нужных каждому загрузчику 
+- терпимое чтение исходного JSONL: битая строка логируется и пропускается,
+  она не должна прерывать всю партию целиком.
+- загрузка в RAW по стратегии идемпотентности full refresh: TRUNCATE
+  целевой таблицы, затем пакетная вставка всего в одной транзакции. Это
+  гарантирует, что повторный запуск загрузчика никогда не задваивает
+  строки, так как генераторы детерминированы (один и тот же входной файл
+  -> одни и те же строки при каждом запуске).
 """
 
 import json
@@ -21,15 +21,12 @@ logger = logging.getLogger("loaders.common")
 
 
 def read_jsonl_tolerant(path: Path) -> tuple[list[dict], int]:
-    """Read a JSONL file, returning (valid_records, invalid_line_count).
+    """Читает JSONL-файл, возвращает (valid_records, invalid_line_count).
 
-    A line that isn't valid JSON is logged and skipped rather than raising -
-    per spec section 23, a small number of bad source records should not
-    abort the complete batch. Note this is about malformed JSON *syntax*;
-    the intentionally "dirty" values our generators produce (NULLs, bad
-    casing, wrong types, orphan FKs) are all still valid JSON and pass
-    through here untouched - they're RAW's job to hold as-is, not this
-    function's job to filter.
+    Строка, не являющаяся валидным JSON, логируется и пропускается, а не
+    вызывает падение, небольшое число
+    плохих исходных записей не должно прерывать всю партию. Речь именно
+    о битом синтаксисе JSON, а не о намеренно испорченных данных
     """
     if not path.exists():
         raise FileNotFoundError(f"{path} not found. Run the matching generator first.")
@@ -52,14 +49,16 @@ def read_jsonl_tolerant(path: Path) -> tuple[list[dict], int]:
 
 
 def full_refresh_load(conn, schema: str, table: str, columns: list[str], records: list[dict]) -> int:
-    """TRUNCATE schema.table, then batch-insert `records` in one transaction.
-
-    `columns` defines both the column order for the INSERT and which keys
-    are read from each record dict (via .get(), so a missing key becomes
-    NULL rather than raising).
-
-    Returns the number of rows inserted. Raises and rolls back on error -
-    a failed load should not leave the table half-truncated/half-loaded.
+    """TRUNCATE schema.table, затем пакетная вставка `records` в одной транзакции.
+ 
+    `columns` задаёт и порядок колонок в INSERT, и то, какие ключи читаются
+    из каждого словаря-записи (через .get(), так что отсутствующий ключ
+    превращается в NULL, а не вызывает ошибку).
+ 
+    Возвращает число вставленных строк. При ошибке выбрасывает исключение
+    и откатывает транзакцию, неудачная загрузка не должна оставлять
+    таблицу в промежуточном состоянии "наполовину очищена, наполовину
+    загружена"
     """
     rows = [tuple(record.get(col) for col in columns) for record in records]
 

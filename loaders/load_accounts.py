@@ -1,5 +1,5 @@
 """
-Load data/raw_source/accounts.jsonl into raw.accounts (full refresh).
+Загружает data/raw_source/accounts.jsonl в raw.accounts (full refresh)
 """
 
 import logging

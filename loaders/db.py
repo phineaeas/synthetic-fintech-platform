@@ -1,9 +1,10 @@
 """
-Shared PostgreSQL connection helper for loaders.
-
-Loaders run on the host (WSL conda env), not inside the Docker network, so
-we connect via the port docker-compose publishes to localhost - not via the
-`postgres` service hostname (that only resolves inside the compose network).
+Общий помощник для подключения к PostgreSQL, используется всеми загрузчиками.
+ 
+Загрузчики запускаются на хосте (conda-окружение в WSL), а не внутри
+Docker-сети, поэтому подключаемся через порт, который docker-compose
+публикует на localhost, а не по имени сервиса `postgres` (оно резолвится
+только внутри сети compose).
 """
 
 import os
@@ -12,10 +13,10 @@ from pathlib import Path
 import psycopg2
 from dotenv import load_dotenv
 
-# Load the project's .env file explicitly. load_dotenv() searches the
-# current directory and its parents by default, but being explicit here
-# means loaders work correctly regardless of which directory they're
-# invoked from.
+# Явно загружаем .env файл проекта. load_dotenv() по умолчанию ищет файл в
+# текущей директории и родительских, но явное указание пути гарантирует,
+# что загрузчики работают корректно независимо от того, из какой папки их
+# запустили.
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 load_dotenv(PROJECT_ROOT / ".env")
 
