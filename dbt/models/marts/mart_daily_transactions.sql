@@ -1,11 +1,11 @@
--- Mart: mart_daily_transactions. Grain: 1 row = 1 calendar day.
+-- Mart: mart_daily_transactions. Грануляция: 1 строка = 1 календарный день.
 --
--- Design note: total_amount / average_transaction_amount are computed
--- across ALL transactions regardless of status (success/failed/pending),
--- mirroring transaction_count. If you need "successful revenue only",
--- that's a different, deliberately narrower metric - filter by status in
--- the BI layer (Superset) rather than baking one interpretation into this
--- mart's only amount column.
+-- Design-заметка: total_amount / average_transaction_amount считаются по
+-- ВСЕМ транзакциям, независимо от статуса (success/failed/pending),
+-- зеркально transaction_count. Если нужна метрика "только успешная
+-- выручка" - это другая, намеренно более узкая метрика: фильтруйте по
+-- статусу на уровне BI (Superset), а не зашивайте одну интерпретацию в
+-- единственную колонку суммы этого mart'а.
 
 with transactions as (
 

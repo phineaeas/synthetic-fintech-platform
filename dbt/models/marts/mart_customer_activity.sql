@@ -1,10 +1,10 @@
--- Mart: mart_customer_activity. Grain: 1 row = 1 customer.
+-- Mart: mart_customer_activity. Грануляция: 1 строка = 1 клиент.
 --
--- Left-joined from dim_customer (not built up from transactions) so that
--- customers with zero transactions still appear as a row with
--- transaction_count = 0, rather than disappearing from the mart entirely -
--- "customers with no activity" is itself a meaningful thing to be able to
--- count in Superset (spec section 24: "active customers").
+-- LEFT JOIN от dim_customer (а не построение снизу вверх от транзакций),
+-- чтобы клиенты без единой транзакции всё равно появлялись строкой с
+-- transaction_count = 0, а не исчезали из mart'а совсем - "клиенты без
+-- активности" сами по себе значимая вещь, которую нужно уметь посчитать
+-- в Superset (раздел 24 спецификации: "active customers").
 
 with customers as (
 

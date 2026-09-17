@@ -1,5 +1,4 @@
--- Core: dim_merchant. Grain: 1 row = 1 merchant.
--- See dim_customer.sql for why this layer exists despite being a pass-through.
+-- Core: dim_merchant. Грануляция: 1 строка = 1 мерчант.
 
 select
     merchant_id,

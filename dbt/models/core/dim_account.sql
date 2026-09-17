@@ -1,5 +1,5 @@
--- Core: dim_account. Grain: 1 row = 1 account.
--- See dim_customer.sql for why this layer exists despite being a pass-through.
+-- Core: dim_account. Грануляция: 1 строка = 1 счёт.
+-- Почему этот слой существует, несмотря на то что это прямой перенос - см. dim_customer.sql.
 
 select
     account_id,

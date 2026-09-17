@@ -1,32 +1,32 @@
 version: 2
-
+ 
 models:
   - name: dim_customer
-    description: Customer dimension. Grain 1 row = 1 customer.
+    description: Измерение "клиент". Грануляция 1 строка = 1 клиент.
     columns:
       - name: customer_id
         tests:
           - unique
           - not_null
-
+ 
   - name: dim_account
-    description: Account dimension. Grain 1 row = 1 account.
+    description: Измерение "счёт". Грануляция 1 строка = 1 счёт.
     columns:
       - name: account_id
         tests:
           - unique
           - not_null
-
+ 
   - name: dim_merchant
-    description: Merchant dimension. Grain 1 row = 1 merchant.
+    description: Измерение "мерчант". Грануляция 1 строка = 1 мерчант.
     columns:
       - name: merchant_id
         tests:
           - unique
           - not_null
-
+ 
   - name: fct_transaction
-    description: Transaction fact. Grain 1 row = 1 transaction.
+    description: Факт "транзакция". Грануляция 1 строка = 1 транзакция.
     columns:
       - name: transaction_id
         tests:

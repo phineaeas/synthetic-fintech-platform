@@ -1,11 +1,12 @@
--- Core: dim_customer. Grain: 1 row = 1 customer.
+-- Core: dim_customer. Грануляция: 1 строка = 1 клиент.
 --
--- A straight pass-through of stg_customers - all cleanup already happened
--- in staging. This model exists as a separate layer (materialized as a
--- TABLE, not a view) so downstream marts get a stable, fast-to-query
--- dimension rather than recomputing the staging CTE chain on every read.
--- It's also the natural place to add business logic later (e.g. SCD2
--- history, derived attributes) without touching staging's cleanup logic.
+-- Прямой перенос из stg_customers - вся очистка уже произошла в staging.
+-- Этот слой существует отдельно (материализован как TABLE, не view),
+-- чтобы marts ниже по пайплайну получали стабильное, быстро читаемое
+-- измерение, а не пересчитывали цепочку CTE из staging при каждом
+-- обращении. Это также естественное место добавить бизнес-логику позже
+-- (например, историю SCD2, производные атрибуты), не трогая логику
+-- очистки в staging.
 
 select
     customer_id,

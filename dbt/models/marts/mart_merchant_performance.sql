@@ -1,9 +1,9 @@
--- Mart: mart_merchant_performance. Grain: 1 row = 1 merchant.
+-- Mart: mart_merchant_performance. Грануляция: 1 строка = 1 мерчант.
 --
--- success_rate is a fraction (0..1), not a percentage - format as % in the
--- BI layer if needed. NULLIF guards against divide-by-zero for merchants
--- with zero transactions (left join preserves them, same reasoning as
--- mart_customer_activity).
+-- success_rate - это доля (0..1), не проценты - форматируйте в % на
+-- уровне BI при необходимости. NULLIF защищает от деления на ноль для
+-- мерчантов без единой транзакции (LEFT JOIN сохраняет их, та же логика,
+-- что в mart_customer_activity).
 
 with merchants as (
 
