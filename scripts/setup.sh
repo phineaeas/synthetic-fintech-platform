@@ -20,7 +20,7 @@ cd "$PROJECT_ROOT"
 
 echo "==> Checking for Docker..."
 if ! command -v docker >/dev/null 2>&1; then
-    echo "ERROR: команда 'docker' не найдена. Установите  Install Docker Desktop (Windows/macOS)"
+    echo "ERROR: команда 'docker' не найдена. Установите или запустите Docker Desktop (Windows/macOS)"
     echo "       или Docker Engine (Linux) чтобы продолжить"
     exit 1
 fi
@@ -56,9 +56,10 @@ if [ -s "$CHMOD_LOG" ]; then
 fi
 rm -f "$CHMOD_LOG"
 
-echo "    Примечание: у некоторых файлов не удалось изменить права - это"
-echo "    случается, если Airflow (работающий под другим пользователем внутри"
-echo "    своего контейнера) уже создал их, например dbt/target/*.json из"
-echo "    предыдущего запуска 'dbt run', вызванного через DAG. Если задачи Airflow"
-echo "    позже завершатся с ошибкой PermissionError, повторите этот шаг с sudo:"
-echo "        sudo chmod -R 777 data/ dbt/"
+echo ""
+echo "Настройка завершена. Дальше:"
+echo "  1. docker compose up -d"
+echo "  2. Дождитесь, пока все три сервиса станут healthy: docker compose ps"
+echo "  3. Airflow UI:   http://localhost:8080  (пароль администратора — см. README)"
+echo "  4. Superset UI:  http://localhost:8088  (логин: admin / admin)"
+echo "  5. В Airflow разморозьте и запустите DAG 'fintech_pipeline'."
