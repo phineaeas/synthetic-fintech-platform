@@ -1,6 +1,5 @@
--- Airflow's own operational metadata (DAG runs, task instances, connections,
--- etc.) lives in a separate DATABASE from the warehouse data, not just a
--- separate schema - orchestrator bookkeeping and analytical data shouldn't
--- share a database, even though both happen to run on the same Postgres
--- instance for this local MVP setup.
+-- Создаем отдельную бд внутри этого экземплюра pg 
+-- для метаданных Aiflow (запуски DAG'ов, task instances, connections
+-- и т.д.)
+
 CREATE DATABASE airflow;
